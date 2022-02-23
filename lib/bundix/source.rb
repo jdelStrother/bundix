@@ -7,6 +7,12 @@ class Bundix
     def download(file, url)
       warn "Downloading #{file} from #{url}"
       uri = URI(url)
+
+      if [nil, "file"].include?(uri.scheme)
+        FileUtils.copy(uri.path, file)
+        return
+      end
+
       open_options = {}
 
       unless uri.user
@@ -20,7 +26,7 @@ class Bundix
       end
 
       begin
-        open(uri.to_s, 'r', 0600, open_options) do |net|
+        uri.open(open_options) do |net|
           File.open(file, 'wb+') { |local|
             File.copy_stream(net, local)
           }
